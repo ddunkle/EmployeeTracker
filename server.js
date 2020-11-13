@@ -53,7 +53,7 @@ function addNew() {
       name: "action",
       type: "rawlist",
       message: "Select a choice to add",
-      choices: ["Employee","Department","Role","Exit"]
+      choices: ["Employee", "Department", "Role", "Exit"]
     })
     .then(function (answer) {
       switch (answer.action) {
@@ -70,9 +70,7 @@ function addNew() {
           break;
       }
     });
-
 };
-
 function addEmployee() {
   inquirer
     .prompt([
@@ -145,5 +143,22 @@ function addRole() {
         })
     });
 }
+function view() {
+  inquirer
+    .prompt({
+      name: "action",
+      type: "rawlist",
+      message: "What would you like to view",
+      choices: ["Employee", "Department", "Role"]
+    })
+    .then(function (response) {
+      var query = `SELECT * FROM ${response.action}`;
+      connection.query(query, function (err, res) {
+        if (err) throw err;
+        console.log(res);
+        start();
+      })
+    });
+};
 
 
