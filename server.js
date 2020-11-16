@@ -118,31 +118,53 @@ function addDepartment() {
     });
 }
 function addRole() {
-  inquirer
-    .prompt([
-      {
-        type: "input",
-        message: "What role would you like to add?",
-        name: "title"
-      },
-      {
-        type: "input",
-        message: "What is the salary for this role?",
-        name: "salary"
-      }
-    ]).then(function (response) {
-      var query = "INSERT INTO ROLE SET ?";
-      connection.query(query,
+  connection.query("SELECT * FROM department", function (err, results) {
+    if (err) throw err;
+    inquirer
+      .prompt([
         {
-          title: response.title,
-          salary: response.salary
-        }, function (err, res) {
-          if (err) throw err;
-          console.log("successfully added")
-          start();
-        })
-    });
-}
+          type: "input",
+          message: "What role would you like to add?",
+          name: "title"
+        },
+        {
+          type: "input",
+          message: "What is the salary for this role?",
+          name: "salary"
+        },
+        {
+          type: "rawlist",
+          name: "department",
+          choices: function () {
+            var choiceArray = [];
+            for (var i = 0; i < results.length; i++) {
+              choiceArray.push(results[i].name);
+            }
+            return choiceArray;
+          },
+          message: "What department should this role be added to?"
+        }
+      ]).then(function (response) {
+        var deptChoice;
+        for (var i = 0; i < results.length; i++) {
+          if (results[i].name === response.department) {
+            deptChoice = results[i].id;
+          }
+        };         
+        connection.query("INSERT INTO ROLE SET ?",
+          {
+            title: response.title,
+            salary: response.salary,
+            department_id: deptChoice
+          }, function (err) {
+            if (err) throw err;
+            console.log("successfully added")
+            start();
+          })
+      });
+  });
+};
+
 function view() {
   inquirer
     .prompt({
